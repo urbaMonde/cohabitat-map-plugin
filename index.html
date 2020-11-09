@@ -13,8 +13,9 @@
 <script>
 
   // Config
-  const ENDPOINT = 'https://api.cohabitat.io/projects';
-  const PROJECT_URL = 'https://www.cohabitat.io/en/projects/';
+  const PARTNER_ID = 'e29b30f1-5868-4e7c-870c-65d755e5791c';
+  const ENDPOINT = `https://api.staging.cohabitat.io/partners/${PARTNER_ID}`;
+  const PROJECT_URL = 'https://staging.cohabitat.io/en/projects/';
   const BACKGROUND = 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png';
 
   // Map
@@ -45,8 +46,11 @@
         console.log('marker ' + a.layer);
       });
       var result = JSON.parse(xhr.responseText);
-      for(i in result['data']){
-        var project = result['data'][i];
+      for(i in result['included']){
+        var project = result['included'][i];
+        if( project.type != 'projects') {
+          continue;
+        }
         try {
           // L.circleMarker(project['attributes']['coordinates']).addTo(mymap);
           // L.marker(project['attributes']['coordinates']).addTo(mymap); // slow !
