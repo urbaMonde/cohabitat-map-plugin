@@ -28,9 +28,16 @@
     BACKGROUND,
     {
       attribution: 'Background : <a href="https://www.openstreetmap.org/">OpenStreetMap</a>/<a href="https://www.carto.com/">Carto</a>',
-      maxZoom: 18
+      maxZoom: 18,
+      minZoom: 2,
     }
   ).addTo(mymap);
+
+  var bounds = [[-90, -180], [90, 180]];
+  mymap.setMaxBounds(bounds);
+  mymap.on('drag', function() {
+    mymap.panInsideBounds(bounds, { animate: false });
+  });
 
   // Query
   var xhr = new XMLHttpRequest();
