@@ -7,18 +7,12 @@
 <script src="https://www.unpkg.com/spin@0.0.1/dist/spin.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.Spin/1.1.2/leaflet.spin.min.js"></script>
 
+<div id="cohabitat-map" style="width: 100%; height: 100%;"></div>
 
-<div id="mapid" style="width: 100%; height: 100%;"></div>
-
+<!-- Customize style -->
 <style>
-  #mapid img.leaflet-marker-icon{
-    filter: brightness(0.7) saturate(0.8) hue-rotate(72deg) ;
-  }
-  .leaflet-tooltip{
-    font-weight: bolder;
-    font-size: 110%;
-  }
-
+  #cohabitat-map img.leaflet-marker-icon{ filter: brightness(0.7) saturate(0.8) hue-rotate(72deg) ;  }
+  .leaflet-tooltip{ font-weight: bolder; font-size: 110%; }
   .marker-cluster{background-color: rgba(112, 50, 150, 0.4);}
   .marker-cluster div {background-color: rgba(112, 50, 150, 0.6);  }
 </style>
@@ -32,24 +26,24 @@
   const BACKGROUND = 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png';
 
   // Map
-  var mymap = L.map('mapid');
-  mymap.attributionControl.setPrefix('<a href="https://cohabitat.io">CoHabitat.io</a>');
-  mymap.spin(true);
-  // mymap.setView([51.505, -0.09], 13);
+  var map = L.map('cohabitat-map');
+  map.attributionControl.setPrefix('<a href="https://cohabitat.io">CoHabitat.io</a>');
+  map.spin(true);
 
+  // Background layer
   L.tileLayer(
     BACKGROUND,
     {
       attribution: 'Background : <a href="https://www.openstreetmap.org/">OpenStreetMap</a>/<a href="https://www.carto.com/">Carto</a>',
-      maxZoom: 18,
-      minZoom: 2,
+      maxZoom: 18, minZoom: 2,
     }
-  ).addTo(mymap);
+  ).addTo(map);
 
+  // Restrict panning
   var bounds = [[-90, -180], [90, 180]];
-  mymap.setMaxBounds(bounds);
-  mymap.on('drag', function() {
-    mymap.panInsideBounds(bounds, { animate: false });
+  map.setMaxBounds(bounds);
+  map.on('drag', function() {
+    map.panInsideBounds(bounds, { animate: false });
   });
 
   // Query
@@ -62,9 +56,6 @@
       function openWebsite(e){
         window.open(PROJECT_URL + this.options.uuid)
       }
-      markers.on('click', function (a) {
-        console.log('marker ' + a.layer);
-      });
       var result = JSON.parse(xhr.responseText);
       for(i in result['included']){
         var project = result['included'][i];
@@ -72,8 +63,6 @@
           continue;
         }
         try {
-          // L.circleMarker(project['attributes']['coordinates']).addTo(mymap);
-          // L.marker(project['attributes']['coordinates']).addTo(mymap); // slow !
           var marker = new L.marker(project['attributes']['coordinates'], {uuid: project['id']});
           marker.bindTooltip(
             project['attributes']['name_short'] || project['attributes']['name'],
@@ -85,13 +74,13 @@
           console.log("Could not load project : "+project);
         }
       }
-      mymap.fitBounds(markers.getBounds());
-      mymap.addLayer(markers);
+      map.fitBounds(markers.getBounds());
+      map.addLayer(markers);
     }
     else {
       console.log('Request failed.  Returned status of ' + xhr.status);
     }
-    mymap.spin(false);
+    map.spin(false);
   };
   xhr.send();
 </script>
