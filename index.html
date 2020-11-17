@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <base target="_parent">
@@ -14,123 +15,136 @@
   <script src="https://unpkg.com/spin@0.0.1/dist/spin.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.Spin/1.1.2/leaflet.spin.min.js"></script>
   <style>
-    html, body { padding: 0; margin: 0; height: 100%; width: 100%; }
-    #cohabitat-map { height: 100%; width: 100%; }
-    .leaflet-tooltip { font-weight: bolder; font-size: 110%; }
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    #cohabitat-map {
+      height: 100%;
+      width: 100%;
+    }
+
+    .leaflet-tooltip {
+      font-weight: bolder;
+      font-size: 110%;
+    }
   </style>
 </head>
 
 <body>
 
-<div id="cohabitat-map"></div>
+  <div id="cohabitat-map"></div>
 
-<script>
+  <script>
 
-  // Default params
-  let params = {
-    partner_id: 'b79f083b-412c-410e-abe7-0fd402c6afbf',
-  };
+    // Default params
+    let params = {
+      partner_id: 'b79f083b-412c-410e-abe7-0fd402c6afbf',
+    };
 
-  // Parse params
-  document.location.hash.substring(1).split("&").forEach(function(hashparam){
-    let parts = hashparam.split("=");
-    params[parts[0]] = parts[1];
-  });
+    // Parse params
+    document.location.hash.substring(1).split("&").forEach(function (hashparam) {
+      let parts = hashparam.split("=");
+      params[parts[0]] = parts[1];
+    });
 
-  // Map
-  var map = L.map('cohabitat-map');
-  map.attributionControl.setPrefix('<a href="https://www.cohabitat.io">CoHabitat.io</a>');
-  map.spin(true);
+    // Map
+    var map = L.map('cohabitat-map');
+    map.attributionControl.setPrefix('<a href="https://www.cohabitat.io">CoHabitat.io</a>');
+    map.spin(true);
 
-  // Background layer
-  L.tileLayer(
-    'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-    {
-      attribution: 'Background : <a href="https://www.openstreetmap.org/">OpenStreetMap</a>/<a href="https://www.carto.com/">Carto</a>',
-      maxZoom: 18,
-      minZoom: 2,
-    }
-  ).addTo(map);
+    // Background layer
+    L.tileLayer(
+      'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+      {
+        attribution: 'Background : <a href="https://www.openstreetmap.org/">OpenStreetMap</a>/<a href="https://www.carto.com/">Carto</a>',
+        maxZoom: 18,
+        minZoom: 2,
+      }
+    ).addTo(map);
 
-  // Restrict panning
-  var bounds = [[-90, -180], [90, 180]];
-  map.setMaxBounds(bounds);
-  map.on('drag', function() {
-    map.panInsideBounds(bounds, { animate: false });
-  });
+    // Restrict panning
+    var bounds = [[-90, -180], [90, 180]];
+    map.setMaxBounds(bounds);
+    map.on('drag', function () {
+      map.panInsideBounds(bounds, { animate: false });
+    });
 
-  // Styling
-  if( params['color'] ) {
-
-    // Colorize the marker clusters using a css rule (dirty hack !)
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = `
+    // Styling
+    if (params['color']) {
+      // Colorize the marker clusters using a css rule (dirty hack !)
+      var style = document.createElement('style');
+      style.type = 'text/css';
+      style.innerHTML = `
       .marker-cluster{ background-color: #${params['color']}66; }
       .marker-cluster div { background-color: #${params['color']}99; color: white; font-weight: bolder; }
     `;
-    document.getElementsByTagName('head')[0].appendChild(style);
+      document.getElementsByTagName('head')[0].appendChild(style);
 
-    // Use a custom marker
-    let svg = `<?xml version="1.0" encoding="UTF-8"?>
+      // Use a custom marker
+      let svg = `<?xml version="1.0" encoding="UTF-8"?>
       <svg enable-background="new 0 0 365 560" version="1.1" viewBox="0 0 365 560" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
         <path d="m182.9 551.7c0 0.1 0.2 0.3 0.2 0.3s175.2-269 175.2-357.4c0-130.1-88.8-186.7-175.4-186.9-86.6 0.2-175.4 56.8-175.4 186.9 0 88.4 175.3 357.4 175.3 357.4z" fill="#${params['color']}"/>
         <ellipse cx="182.9" cy="175.28" rx="68.901" ry="71.389" fill="#fff" fill-rule="evenodd" stroke-width=".89547"/>
       </svg>`;
-    var icon = new L.divIcon({
-      className: 'transparent',
-      iconUrl: 'marker.svg',
-      iconSize: [25, 41],
-      iconAnchor: [13, 40],
-      html: svg,
-    });
-  }
-  else {
-    // Use the default marker
-    var icon = new L.Icon.Default();
-  }
-
-  // Callback on click
-  function click(e){
-    window.open('https://cohabitat.io/en/projects/' + this.options.uuid)
-  }
-
-  // Query
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', `https://api.cohabitat.io/partners/${params['partner_id']}`);
-  xhr.setRequestHeader('Accept', 'application/vnd.cohabitat.v1+json')
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      var markers = L.markerClusterGroup({showCoverageOnHover: false});
-      var result = JSON.parse(xhr.responseText);
-      for(i in result['included']){
-        var project = result['included'][i];
-        if( project.type != 'projects') {
-          continue;
-        }
-        try {
-          var marker = new L.marker(project['attributes']['coordinates'], {uuid: project['id'], icon: icon});
-          marker.bindTooltip(
-            project['attributes']['name_short'] || project['attributes']['name'],
-            { permanent: false, direction: 'bottom', interactive: true, offset: [0, 0] }
-          );
-          marker.on('click', click);
-          markers.addLayer(marker);
-        } catch (error) {
-          console.log("Could not load project : "+project);
-        }
-      }
-      map.fitBounds(markers.getBounds());
-      map.addLayer(markers);
+      var icon = new L.divIcon({
+        className: 'transparent',
+        iconUrl: 'marker.svg',
+        iconSize: [25, 41],
+        iconAnchor: [13, 40],
+        html: svg,
+      });
     }
     else {
-      console.log('Request failed. Returned status of ' + xhr.status);
+      // Use the default marker
+      var icon = new L.Icon.Default();
     }
-    map.spin(false);
-  };
-  xhr.send();
 
-</script>
+    // Callback on click
+    function click(e) {
+      window.open('https://cohabitat.io/en/projects/' + this.options.uuid)
+    }
+
+    // Query
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', `https://api.cohabitat.io/partners/${params['partner_id']}`);
+    xhr.setRequestHeader('Accept', 'application/vnd.cohabitat.v1+json')
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        var markers = L.markerClusterGroup({ showCoverageOnHover: false });
+        var result = JSON.parse(xhr.responseText);
+        for (i in result['included']) {
+          var project = result['included'][i];
+          if (project.type != 'projects') {
+            continue;
+          }
+          try {
+            var marker = new L.marker(project['attributes']['coordinates'], { uuid: project['id'], icon: icon });
+            marker.bindTooltip(
+              project['attributes']['name_short'] || project['attributes']['name'],
+              { permanent: false, direction: 'bottom', interactive: true, offset: [0, 0] }
+            );
+            marker.on('click', click);
+            markers.addLayer(marker);
+          } catch (error) {
+            console.log("Could not load project : " + project);
+          }
+        }
+        map.fitBounds(markers.getBounds());
+        map.addLayer(markers);
+      }
+      else {
+        console.log('Request failed. Returned status of ' + xhr.status);
+      }
+      map.spin(false);
+    };
+    xhr.send();
+
+  </script>
 
 </body>
 
