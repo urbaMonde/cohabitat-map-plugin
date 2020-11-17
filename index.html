@@ -3,9 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base target="_parent">
-  <title>Co-Habitat</title>
-  <meta name="author" content="">
-  <meta name="description" content="">
+  <title>Co-Habitat - Partner map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
@@ -13,19 +11,18 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spin.js/4.1.0/spin.min.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-  <script src="https://www.unpkg.com/spin@0.0.1/dist/spin.min.js"></script>
+  <script src="https://unpkg.com/spin@0.0.1/dist/spin.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.Spin/1.1.2/leaflet.spin.min.js"></script>
   <style>
-    /* Style */
-    html, body{ padding: 0; margin: 0; height: 100%; width: 100% }
-    #cohabitat-map{ height: 100%; width: 100% }
-    .leaflet-tooltip{ font-weight: bolder; font-size: 110%; }
+    html, body { padding: 0; margin: 0; height: 100%; width: 100%; }
+    #cohabitat-map { height: 100%; width: 100%; }
+    .leaflet-tooltip { font-weight: bolder; font-size: 110%; }
   </style>
 </head>
 
 <body>
 
-<div id="cohabitat-map" style="width: 100%; height: 100%;"></div>
+<div id="cohabitat-map"></div>
 
 <script>
 
@@ -42,7 +39,7 @@
 
   // Map
   var map = L.map('cohabitat-map');
-  map.attributionControl.setPrefix('<a href="https://cohabitat.io">CoHabitat.io</a>');
+  map.attributionControl.setPrefix('<a href="https://www.cohabitat.io">CoHabitat.io</a>');
   map.spin(true);
 
   // Background layer
@@ -127,7 +124,7 @@
       map.addLayer(markers);
     }
     else {
-      console.log('Request failed.  Returned status of ' + xhr.status);
+      console.log('Request failed. Returned status of ' + xhr.status);
     }
     map.spin(false);
   };
