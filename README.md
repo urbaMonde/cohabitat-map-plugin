@@ -6,7 +6,7 @@ Live demo: https://urbamonde.github.io/cohabitat-map-plugin/example-iframe.html
 
 ## Usage
 
-To install, add the following HTML code to your website. Make sure to replace `PARTNER_ID_HERE` by the ID of the partner projects you want to display.
+To install, add the following HTML code to your website. Make sure to replace `PARTNER_ID_HERE` by the id of the partner whose projects you want to display.
 
 ```
 <iframe src="https://urbamonde.github.io/cohabitat-map-plugin/#partner_id=PARTNER_ID_HERE"
